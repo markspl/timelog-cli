@@ -66,7 +66,7 @@ source ~/.bashrc    # Bash, or
 source ~/.zshrc     # Zsh
 ```
 
-Try it with `tl list`.
+Try it with `tl version`.
 
 ## Design ideas
 
