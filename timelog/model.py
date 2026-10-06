@@ -11,7 +11,7 @@ from dataclasses import dataclass
 from datetime import datetime
 
 TIME_FORMAT = "%Y-%m-%d %H:%M"
-TYPES = ("add",)  # planned more types later (e.g. note, stop)
+TYPES = ("add", "note")  # planned more types later (e.g. list, stop)
 
 def clean_text(text: str) -> str:
     """One entry is one line: tabs and newlines become spaces, extra spaces are collapsed."""

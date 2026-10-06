@@ -14,7 +14,7 @@ def _day_file(day: date) -> Path:
     return _data_dir() / (day.isoformat() + ".tsv")
 
 def append_entry(entry: Entry) -> None:
-    """Add one line to the file of the entry's date. Creates the folder and file if needed."""
+    """Add one add-type line to the file of the entry's date. Creates the folder and file if needed."""
     path = _day_file(entry.time.date())
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a", encoding="utf-8", newline="\n") as f:

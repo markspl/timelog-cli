@@ -21,10 +21,11 @@ Commands:
 
 COMMANDS = {
     "add": commands.add,
+    "note": commands.note,
 }
 
 # Planned commands from README
-PLANNED = {"list", "note", "now", "edit", "stop", "delete", "nonwork"}
+PLANNED = {"list", "now", "edit", "stop", "delete", "nonwork"}
 
 def main(argv):
     if not argv or argv[0] in ("help", "-h", "--help"):
@@ -42,9 +43,9 @@ def main(argv):
         return handler(args)
 
     if name in PLANNED:
-        print("tl: '%s' is not implemented yet." % name, file=sys.stderr)
+        print(f"tl: '{name}' is not implemented yet.", file=sys.stderr)
     else:
-        print("tl: unknown command '%s'. Try 'tl help'." % name, file=sys.stderr)
+        print(f"tl: unknown command '{name}'. Try 'tl help'.", file=sys.stderr)
     return 1
 
 

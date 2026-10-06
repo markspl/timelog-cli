@@ -5,16 +5,16 @@ Simple time/task logging on the command line. Plain-text log, no dependencies.
 - Log when you **start** a task
 - The duration of a task is the time until the next entry
 - Show current running task or all tasks and totals
-- Add notes if needed (planned)
+- Add notes if needed
 
 ## Commands
 
 ```bash
 tl add [--time HH:MM | -t HH:MM] <description>  # start a task now
+tl note <one-line note>                         # add a note to the current task
 
 # Planned commands, in no particular order
 tl list                         # list of entries and totals
-tl note <one-line note>         # add a note to the current task
 tl now                          # show current task and duration
 tl edit                         # open today's log file in $EDITOR
 tl stop [reason]                # end the current task (e.g. lunch, or going home). Reason is optional.
@@ -133,7 +133,7 @@ $ tl add Alert-123
 Started: Alert-123 (12:00)
 
 $ tl note Noticed an issue with logging, created ticket Ticket-69
-Note added.
+Note added: Noticed an issue with logging, created ticket Ticket-69 (12:20)
 
 $ tl add -t 14:00 coffee
 Added: coffee (14:00)
