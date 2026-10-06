@@ -39,7 +39,7 @@ def add(args: List[str]) -> int:
             print(f"tl add: {args[0]} needs HH:MM, e.g. 14:30", file=sys.stderr)
             return 1
 
-    entry = Entry(time=when, type="add", text=" ".join(args[2:]))
+    entry = Entry(time=when, type="add", text=" ".join(args[2:] if time_str else args[0:]))
     if not entry.text:
         print("tl add: description is missing. Usage: tl add <description>", file=sys.stderr)
         return 1
