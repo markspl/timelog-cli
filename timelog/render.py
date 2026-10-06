@@ -11,3 +11,7 @@ def format_duration(minutes: int) -> str:
 def started(entry: Entry) -> str:
     """The message after `tl add`, e.g. 'Started: Team daily (09:15)'."""
     return "Started: %s (%s)" % (entry.text, entry.time.strftime("%H:%M"))
+
+def time_added(entry: Entry) -> str:
+    """The message after `tl add (-t|--time)`, e.g. 'Added: Team daily (09:15)'."""
+    return "Added: %s (%s)" % (entry.text, entry.time.strftime("%H:%M"))

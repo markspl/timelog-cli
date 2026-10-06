@@ -10,7 +10,7 @@ Simple time/task logging on the command line. Plain-text log, no dependencies.
 ## Commands
 
 ```bash
-tl add <description>            # start a task now
+tl add [--time HH:MM | -t HH:MM] <description>  # start a task now
 
 # Planned commands, in no particular order
 tl list                         # list of entries and totals
@@ -135,8 +135,8 @@ Started: Alert-123 (12:00)
 $ tl note Noticed an issue with logging, created ticket Ticket-69
 Note added.
 
-$ tl add coffee
-Started: coffee (14:00)
+$ tl add -t 14:00 coffee
+Added: coffee (14:00)
 
 $ tl add Ticket-68
 Started: Ticket-68 (14:30)

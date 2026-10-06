@@ -14,9 +14,9 @@ timelog-cli {version} - log what you work on
 Usage: tl <command> [text]
 
 Commands:
-  add <description>   start a task now
-  version             show the version
-  help                show this help
+  add [-t HH:MM | --time HH:MM] <description>   start a task now
+  version                                       show the version
+  help                                          show this help
 """.format(version=__version__)
 
 COMMANDS = {
