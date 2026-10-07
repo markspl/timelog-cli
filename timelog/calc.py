@@ -11,6 +11,7 @@ from typing import List, Optional, Tuple
 
 from .model import Entry
 
+
 def durations(entries: List[Entry], now: datetime) -> List[Tuple[Entry, Optional[int]]]:
     """Pair each entry with its duration in minutes. `None` for notes and stops."""
     raise NotImplementedError("planned for `tl list`")
