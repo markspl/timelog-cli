@@ -2,8 +2,9 @@
 
 A command gets the words after its name and returns the exit code.
 """
+import re
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List
 
 from . import render, storage
@@ -26,8 +27,35 @@ def _get_time_flag(args):
         return args[1], args[2:]
     return None, args
 
+
+def _parse_time_flag(value: str, now: datetime) -> datetime:
+    """'11:30' -> today at 11:30. '1h15m', '1h', '5m' -> now minus the duration."""
+    if ":" in value:
+        hh, mm = value.split(":")
+        return now.replace(hour=int(hh), minute=int(mm))
+
+    # check string match pattern ?(digits)h?(digits)m, e.g. "1h30m"
+    # saves as Match object
+    m = re.fullmatch(r"(?:(\d+)h)?(?:(\d+)m)?", value)
+    if not m or not value:
+        raise ValueError(value)
+
+    # groups() returns a tuple of all captured groups
+    hours, minutes = (int(g) if g else 0 for g in m.groups())
+    return now - timedelta(hours=hours, minutes=minutes)
+
+
 def add(args: List[str]) -> int:
-    """tl add [-t HH:MM | --time HH:MM] <description>: start a task, now or at a given time."""
+    """tl add [-t|--time <value>] <description>: start a task.
+
+    Task starts when a command is sent, if no flag -t/--time.
+    With the flag, value is either a time (12:00) or how long ago it started (1h30m).
+
+    Examples:
+        tl add Explaining what 67 means
+        tl add -t 14:30 Meeting
+        tl add --time 1h30m Long lunch
+    """
     time_str, rest = _get_time_flag(args)
     if time_str is None and rest is None:
         return 1
@@ -35,12 +63,9 @@ def add(args: List[str]) -> int:
     when = _now()
     if time_str:
         try:
-            when = when.replace(
-                hour=int(time_str.split(":")[0]),
-                minute=int(time_str.split(":")[1]),
-            )
+            when = _parse_time_flag(time_str, now=when)
         except ValueError:
-            print(f"tl add: {args[0]} needs HH:MM, e.g. 14:30", file=sys.stderr)
+            print(f"tl add: can't parse time flag '{time_str}'. Use HH:MM or e.g. 1h5m, 15m", file=sys.stderr)
             return 1
 
     entry = Entry(time=when, type="add", text=" ".join(rest))
