@@ -7,11 +7,14 @@ from pathlib import Path
 
 from .model import Entry
 
+
 def _data_dir() -> Path:
     return Path.home() / ".timelog"
 
+
 def _day_file(day: date) -> Path:
     return _data_dir() / (day.isoformat() + ".tsv")
+
 
 def append_entry(entry: Entry) -> None:
     """Add one add-type line to the file of the entry's date. Creates the folder and file if needed."""

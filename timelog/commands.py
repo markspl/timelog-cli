@@ -11,8 +11,10 @@ from .model import Entry
 
 TIME_FLAGS = {"-t", "--time"}
 
+
 def _now() -> datetime:
     return datetime.now().replace(second=0, microsecond=0)
+
 
 def _get_time_flag(args):
     """Return (time_string_or_None, remaining_args), pulling out -t/--time and its value.
@@ -41,7 +43,7 @@ def add(args: List[str]) -> int:
             print(f"tl add: {args[0]} needs HH:MM, e.g. 14:30", file=sys.stderr)
             return 1
 
-    entry = Entry(time=when, type="add", text=" ".join(args[2:] if time_str else args[0:]))
+    entry = Entry(time=when, type="add", text=" ".join(rest))
     if not entry.text:
         print(
             render.missing_argument_error("tl add", "description", "tl add <description>"),
@@ -57,10 +59,11 @@ def add(args: List[str]) -> int:
 
     return 0
 
+
 def note(args: List[str]) -> int:
     """tl note <note>: add a note."""
     if args and args[0] in (TIME_FLAGS):
-        print(render.flag_not_allowed("tl note", args[0]))
+        print(render.flag_not_allowed("tl note", args[0]), file=sys.stderr)
         return 1
 
     entry = Entry(time=_now(), type="note", text=" ".join(args[0:]))
