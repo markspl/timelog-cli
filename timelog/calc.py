@@ -1,6 +1,8 @@
 """Calculate durations and totals.
 
 Planned feature. This is needed when showing a list or current task:
+- Entries are sorted by time first. The file is append-only, so an entry
+  added with `-t` can come after entries that are later in time.
 - A task lasts from its `add` entry to the next `add` or `stop` entry.
 - `note` entries are skipped when looking for the end of a task.
 - The last task has no end. The caller passes `now`, and the task is running.
