@@ -3,7 +3,7 @@
 Simple time/task logging on the command line. Plain-text log, no dependencies.
 
 - Log when you **start** a task
-- The duration of a task is the time until the next entry
+- The duration of a task is the time until the next task or stop
 - Show current running task or all tasks and totals
 - Add notes if needed
 
@@ -12,14 +12,14 @@ Simple time/task logging on the command line. Plain-text log, no dependencies.
 ```bash
 tl add [-t|--time <value>] <description>  # start a task now, or at <value> (14:30, 1h5m, 1h, 15m)
 tl note <one-line note>                   # add a note to the current task
+tl help                                   # overview of all commands
+tl version                                # show the version
 
 # Planned commands, in no particular order
 tl list                         # list of entries and totals
 tl now                          # show current task and duration
 tl edit                         # open today's log file in $EDITOR
 tl stop [reason]                # end the current task (e.g. lunch, or going home). Reason is optional.
-tl help                         # overview of all commands
-tl version                      # show the version
 tl delete                       # delete today's log file
 tl nonwork [add|remove|edit]    # non-work tasks whose time is not counted
 ```
@@ -33,9 +33,11 @@ Requires Python 3.8 or newer and git. No other dependencies.
 **1. Clone the project.** Pick a folder where it can stay:
 
 ```bash
-git clone git@github.com:markspl/timelog-cli.git
+git clone https://github.com/markspl/timelog-cli.git
 cd timelog-cli
 ```
+
+> With SSH keys set up on GitHub, you can use `git clone git@github.com:markspl/timelog-cli.git` instead.
 
 **2. Check that the name `tl` is free.** If this prints nothing, it is free:
 
@@ -68,6 +70,8 @@ source ~/.zshrc     # Zsh
 
 Try it with `tl version`.
 
+> **Windows:** run the steps in Git Bash (it comes with Git for Windows). If `python3` is not found, use `python` or `py` in the alias instead.
+
 ## Design ideas
 
 - A task lasts from its own `add` line to the next `add` or `stop` line.
@@ -75,6 +79,7 @@ Try it with `tl version`.
 - `note` adds a line to the current task. It does not end the task and does not change the totals.
 - Each day has its own file, and a new day starts with nothing running.
 - Totals group by exact task name.
+- Entries are sorted by time before durations are calculated. A task added later with `-t` lands in the right place, even though the file is append-only.
 
 ## Log file
 
@@ -139,7 +144,7 @@ $ tl add --time 14:00 coffee
 Added: coffee (14:00)
 
 $ tl add -t 30m Ticket-68
-Started: Ticket-68 (14:30)
+Added: Ticket-68 (14:30)
 
 $ tl stop
 Stopped (16:00)
@@ -161,8 +166,8 @@ Totals
 Ticket-67: Investigate   2h 15m
 Alert-123                2h 00m
 Ticket-68                1h 30m
-Team daily                  15m
 coffee                      30m
+Team daily                  15m
 
 Work total: 6h 30m
 ```
