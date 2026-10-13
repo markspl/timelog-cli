@@ -3,6 +3,9 @@
 log.tsv
 *.log
 
+# Release notes draft (see RELEASING.md)
+notes.md
+
 # Python
 __pycache__/
 *.py[cod]

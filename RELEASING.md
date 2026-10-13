@@ -4,6 +4,10 @@ Everything is done in the terminal, manually, for now.
 
 GitHub CLI (`gh`) is needed. Check with `gh auth status` that you are logged in.
 
+The commands are for bash. On Windows, use Git Bash, not PowerShell.
+
+The release notes are written once and used in two places: `CHANGELOG.md` and the GitHub release.
+
 ## Branches & Tags
 
 - A release needs a tag, not a branch. Tags are made on `main`.
@@ -22,55 +26,66 @@ The version number is in one place: `timelog/__init__.py`.
 
 ## Steps
 
-**1. Change the version** in `timelog/__init__.py`, and check it:
+**1. Check that you are ready.** You should be on `main`, with a clean tree, up to date with origin:
 
 ```bash
-tl version
+git switch main
+git pull
+git status
 ```
 
-**2. Create a release draft** to generate notes:
+**2. Write the release notes.** They are the commit titles since the previous release tag. Do this before the version bump, so the release commit is not in the list:
 
 ```bash
-gh release create v0.1.0 --draft --title "v0.1.0" --generate-notes
+PREV=$(git describe --tags --abbrev=0)   # the previous release tag, e.g. v0.0.1
+VERSION=v0.1.0                           # the new version
+echo "$PREV -> $VERSION"
+{ echo "### What's Changed"; git log "$PREV"..HEAD --no-merges --pretty=format:"* %s"; echo; } > notes.md
+cat notes.md
 ```
 
-**3. Save the draft notes to `CHANGELOG.md`:**
+Read `notes.md` and edit it if needed. It is used for both `CHANGELOG.md` and the GitHub release.
+
+**3. Change the version** in `timelog/__init__.py`, and check that it matches `$VERSION`:
 
 ```bash
-VERSION="v0.1.0"
-DATE=$(date +%Y-%m-%d)
-NOTES=$(gh release view "$VERSION" --json body --jq .body)
-NEW_ENTRY=$(printf "## %s (%s)\n\n%s\n\n" "$VERSION" "$DATE" "$NOTES")
-if [ -f CHANGELOG.md ]; then
-  printf "%s\n%s" "$NEW_ENTRY" "$(cat CHANGELOG.md)" > CHANGELOG.md
-else
-  printf "# Changelog\n\n%s" "$NEW_ENTRY" > CHANGELOG.md
-fi
+python tl.py version
 ```
 
-**4. Commit both files and push:**
+**4. Add the notes to `CHANGELOG.md`**, newest entry first:
+
+```bash
+{ printf "## %s (%s)\n\n" "$VERSION" "$(date +%F)"; cat notes.md; printf "\n"; cat CHANGELOG.md; } > CHANGELOG.new
+mv CHANGELOG.new CHANGELOG.md
+```
+
+**5. Commit both files and push:**
 
 ```bash
 git add timelog/__init__.py CHANGELOG.md
-git commit -m "Release 0.1.0"
+git commit -m "chore: release ${VERSION#v}"
 git push
 ```
 
-**5. Create the tag and push it:**
+**6. Create the release.** This creates the tag on the release commit you just pushed, and uses the same notes:
 
 ```bash
-git tag -a v0.1.0 -m "Release 0.1.0"
-git push origin v0.1.0
+gh release create "$VERSION" --target "$(git rev-parse HEAD)" --title "$VERSION" --notes-file notes.md
+rm notes.md
 ```
 
-`git push` alone does not push tags.
+To read the result on GitHub before it goes public, add `--draft` to the create command, then publish with `gh release edit "$VERSION" --draft=false`.
 
-**6. Publish the release:**
+**7. Update your local tags:**
 
 ```bash
-gh release edit v0.1.0 --draft=false
+git fetch --tags
 ```
 
 ## Notes
 
-- The generated notes list merged pull requests. Commits pushed straight to `main` are not listed, only a link that compares the two versions. Use pull requests with clear titles.
+- The notes come from commit titles, not pull requests, because GitHub's `--generate-notes` skips commits pushed straight to `main`. Clear titles (`feat:`, `fix:`, `refactor:`) make good notes.
+- Pull requests are squash-merged, with the PR title as the commit title. Each PR then shows as one line in the notes, in the same style as direct commits. With a merge commit, every commit from the branch (including WIP ones) would be listed instead.
+- Step 5 pushes straight to `main`. If `main` is later protected so that changes need a pull request, make the release commit on a branch, squash-merge it, and run step 6 after the merge.
+- `gh release create` makes a lightweight tag. That is fine here, since the release page holds the message.
+- Run the steps in one terminal session, since `PREV` and `VERSION` are shell variables.
