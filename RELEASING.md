@@ -40,9 +40,13 @@ git status
 PREV=$(git describe --tags --abbrev=0)   # the previous release tag, e.g. v0.0.1
 VERSION=v0.1.0                           # the new version
 echo "$PREV -> $VERSION"
-{ echo "### What's Changed"; git log "$PREV"..HEAD --no-merges --pretty=format:"* %s"; echo; } > notes.md
+echo "### What's Changed" > notes.md
+git log "$PREV"..HEAD --no-merges --pretty=format:"* %s" >> notes.md
+echo >> notes.md
 cat notes.md
 ```
+
+> Keep these as separate commands. In the VS Code terminal, wrapping them in `{ ...; } > notes.md` writes hidden terminal codes into the file.
 
 Read `notes.md` and edit it if needed. It is used for both `CHANGELOG.md` and the GitHub release.
 
@@ -55,7 +59,10 @@ python tl.py version
 **4. Add the notes to `CHANGELOG.md`**, newest entry first:
 
 ```bash
-{ printf "## %s (%s)\n\n" "$VERSION" "$(date +%F)"; cat notes.md; printf "\n"; cat CHANGELOG.md; } > CHANGELOG.new
+printf "## %s (%s)\n\n" "$VERSION" "$(date +%F)" > CHANGELOG.new
+cat notes.md >> CHANGELOG.new
+printf "\n" >> CHANGELOG.new
+cat CHANGELOG.md >> CHANGELOG.new
 mv CHANGELOG.new CHANGELOG.md
 ```
 
