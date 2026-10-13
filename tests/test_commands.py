@@ -1,5 +1,6 @@
 import contextlib
 import io
+import os
 import tempfile
 import unittest
 from datetime import datetime
@@ -20,6 +21,7 @@ class CommandTestCase(unittest.TestCase):
         self.addCleanup(tmp.cleanup)
         self.home = Path(tmp.name)
         for patcher in (
+            mock.patch.dict(os.environ, {"HOME": str(self.home), "USERPROFILE": str(self.home)}),
             mock.patch.object(Path, "home", return_value=self.home),
             mock.patch.object(commands, "_now", return_value=NOW),
         ):
