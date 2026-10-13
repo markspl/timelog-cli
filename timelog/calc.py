@@ -1,4 +1,4 @@
-"""Calculatee Durations and totals.
+"""Calculate durations and totals.
 
 Planned feature. This is needed when showing a list or current task:
 - A task lasts from its `add` entry to the next `add` or `stop` entry.

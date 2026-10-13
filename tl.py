@@ -16,6 +16,7 @@ Usage: tl <command> [text]
 
 Commands:
   add [-t HH:MM | --time HH:MM] <description>   start a task now
+  note <text>                                   add a note to the current task
   version                                       show the version
   help                                          show this help
 """.format(version=__version__)
