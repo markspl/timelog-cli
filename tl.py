@@ -15,10 +15,14 @@ timelog-cli {version} - log what you work on
 Usage: tl <command> [text]
 
 Commands:
-  add [-t HH:MM | --time HH:MM] <description>   start a task now
-  note <text>                                   add a note to the current task
-  version                                       show the version
-  help                                          show this help
+  add [-t | --time <value>] <description>   start a task now, or at <value>
+  note <text>                               add a note to today's log
+  version                                   show the version
+  help                                      show this help
+
+Time values for -t / --time:
+  14:30            today at that time
+  1h30m, 1h, 15m   how long ago the task started
 """.format(version=__version__)
 
 COMMANDS = {
