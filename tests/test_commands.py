@@ -43,6 +43,10 @@ class ParseTimeFlagTest(unittest.TestCase):
     def test_clock_time(self):
         self.assertEqual(commands._parse_time_flag("09:30", NOW), datetime(2026, 9, 23, 9, 30))
 
+    def test_clock_time_later_today_is_allowed(self):
+        # logging what will happen later today is intended
+        self.assertEqual(commands._parse_time_flag("23:30", NOW), datetime(2026, 9, 23, 23, 30))
+
     def test_durations(self):
         parse = commands._parse_time_flag
         self.assertEqual(parse("1h30m", NOW), datetime(2026, 9, 23, 10, 30))
@@ -145,7 +149,3 @@ class NoteTest(CommandTestCase):
         code, _, err = self.run_cmd(commands.note, [])
         self.assertEqual(code, 1)
         self.assertIn("description is missing", err)
-
-
-if __name__ == "__main__":
-    unittest.main()

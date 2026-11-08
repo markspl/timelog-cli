@@ -37,7 +37,3 @@ class EntryTest(unittest.TestCase):
     def test_from_line_unknown_type(self):
         with self.assertRaises(ValueError):
             Entry.from_line("2026-09-23 09:15\tstop\tx")
-
-
-if __name__ == "__main__":
-    unittest.main()

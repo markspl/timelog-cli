@@ -14,7 +14,3 @@ class StorageTest(CommandTestCase):
     def test_uses_lf_line_endings(self):
         storage.append_entry(Entry(NOW, "add", "one"))
         self.assertNotIn(b"\r", self.day_file().read_bytes())
-
-
-if __name__ == "__main__":
-    unittest.main()

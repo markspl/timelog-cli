@@ -27,7 +27,3 @@ class RenderTest(unittest.TestCase):
             "tl add: description is missing. Usage: tl add <description>",
         )
         self.assertEqual(render.flag_not_allowed("tl note", "-t"), "tl note: flag '-t' is not allowed.")
-
-
-if __name__ == "__main__":
-    unittest.main()

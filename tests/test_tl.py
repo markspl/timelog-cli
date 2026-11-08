@@ -39,7 +39,3 @@ class MainTest(unittest.TestCase):
 
     def test_planned_commands_are_not_registered(self):
         self.assertFalse(tl.PLANNED & set(tl.COMMANDS))
-
-
-if __name__ == "__main__":
-    unittest.main()
