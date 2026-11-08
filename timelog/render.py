@@ -1,5 +1,6 @@
 """Turns results into text for the terminal. No files and no printing."""
-from datetime import datetime
+from datetime import date, datetime
+from typing import List
 
 from .model import Entry
 
@@ -35,6 +36,23 @@ def time_added(entry: Entry) -> str:
 def note_added(entry: Entry) -> str:
     """The message after `tl note`, e.g. 'Note added: PR created (10:45)'."""
     return _format_action("Note added", entry)
+
+
+def todo_added(entry: Entry) -> str:
+    """The message after `tl todo`, e.g. 'Todo added: Call the client'."""
+    return f"Todo added: {entry.text}"
+
+
+def todo_list(day: date, entries: List[Entry]) -> str:
+    """Todos of one day as a heading and a bullet list."""
+    lines = [f"Todos from {day.strftime('%a %Y-%m-%d')}:"]
+    lines += [f"  - {e.text}" for e in entries]
+    return "\n".join(lines)
+
+
+def no_todos() -> str:
+    """The message when the previous day has no todos."""
+    return "No todos from the previous day."
 
 
 def missing_argument_error(prefix: str, argument: str, example: str) -> str:
