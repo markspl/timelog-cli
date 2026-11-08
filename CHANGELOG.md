@@ -1,3 +1,21 @@
+## v0.2.0 (2026-11-08)
+
+### Features
+
+* feat: add todo and todos commands (#5)
+* feat: add -t/--time flag to note (#2)
+
+### Bug fixes
+
+* fix: reject add/note times that fall on a previous day (#4)
+
+### Other changes
+
+* docs: add PR template (#3)
+* test: add unit tests and CI (#1)
+* docs: group release notes by commit type, flag breaking changes
+
+
 ## v0.1.0 (2026-10-13)
 
 ### Features
