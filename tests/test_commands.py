@@ -109,10 +109,12 @@ class AddTest(CommandTestCase):
             ["2026-09-23 12:00\tadd\tLater", "2026-09-23 08:00\tadd\tEarlier"],
         )
 
-    def test_backdated_to_previous_day_uses_that_days_file(self):
-        self.run_cmd(commands.add, ["-t", "13h", "Late"])
-        self.assertEqual(self.lines("2026-09-22"), ["2026-09-22 23:00\tadd\tLate"])
-        self.assertFalse(self.day_file().exists())
+    def test_previous_day_is_rejected(self):
+        code, out, err = self.run_cmd(commands.add, ["-t", "13h", "Late"])
+        self.assertEqual(code, 1)
+        self.assertEqual(out, "")
+        self.assertIn("previous day", err)
+        self.assertFalse((self.home / ".timelog").exists())
 
     def test_bad_time_flag(self):
         code, out, err = self.run_cmd(commands.add, ["-t", "nope", "x"])
@@ -148,6 +150,12 @@ class NoteTest(CommandTestCase):
         self.assertEqual(code, 0)
         self.assertEqual(out, "Note added: Decided (09:30)\n")
         self.assertEqual(self.lines(), ["2026-09-23 09:30\tnote\tDecided"])
+
+    def test_note_previous_day_is_rejected(self):
+        code, _, err = self.run_cmd(commands.note, ["-t", "13h", "Late"])
+        self.assertEqual(code, 1)
+        self.assertIn("tl note: '13h' is on a previous day", err)
+        self.assertFalse((self.home / ".timelog").exists())
 
     def test_note_with_duration(self):
         self.run_cmd(commands.note, ["--time", "20m", "Called"])
