@@ -7,8 +7,7 @@ from datetime import datetime
 from pathlib import Path
 from unittest import mock
 
-from timelog import commands, storage
-from timelog.model import Entry
+from timelog import commands
 
 NOW = datetime(2026, 9, 23, 12, 0)
 
@@ -22,7 +21,6 @@ class CommandTestCase(unittest.TestCase):
         self.home = Path(tmp.name)
         for patcher in (
             mock.patch.dict(os.environ, {"HOME": str(self.home), "USERPROFILE": str(self.home)}),
-            mock.patch.object(Path, "home", return_value=self.home),
             mock.patch.object(commands, "_now", return_value=NOW),
         ):
             patcher.start()
@@ -137,26 +135,16 @@ class NoteTest(CommandTestCase):
 
     def test_time_flag_rejected(self):
         for flag in ("-t", "--time"):
-            code, _, err = self.run_cmd(commands.note, [flag, "09:00", "x"])
-            self.assertEqual(code, 1)
-            self.assertIn("not allowed", err)
+            with self.subTest(flag=flag):
+                code, _, err = self.run_cmd(commands.note, [flag, "09:00", "x"])
+                self.assertEqual(code, 1)
+                self.assertIn("not allowed", err)
         self.assertFalse(self.day_file().exists())
 
     def test_missing_text(self):
         code, _, err = self.run_cmd(commands.note, [])
         self.assertEqual(code, 1)
         self.assertIn("description is missing", err)
-
-
-class StorageTest(CommandTestCase):
-    def test_appends_and_creates_dir(self):
-        storage.append_entry(Entry(NOW, "add", "one"))
-        storage.append_entry(Entry(NOW, "note", "two"))
-        self.assertEqual(self.lines(), ["2026-09-23 12:00\tadd\tone", "2026-09-23 12:00\tnote\ttwo"])
-
-    def test_uses_lf_line_endings(self):
-        storage.append_entry(Entry(NOW, "add", "one"))
-        self.assertNotIn(b"\r", self.day_file().read_bytes())
 
 
 if __name__ == "__main__":

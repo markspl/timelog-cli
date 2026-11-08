@@ -30,7 +30,10 @@ class MainTest(unittest.TestCase):
         self.assertIn("unknown command 'frobnicate'", err)
 
     def test_planned_command(self):
-        code, _, err = run_main(["list"])
+        if not tl.PLANNED:
+            self.skipTest("no planned commands left")
+        name = sorted(tl.PLANNED)[0]
+        code, _, err = run_main([name])
         self.assertEqual(code, 1)
         self.assertIn("not implemented yet", err)
 
