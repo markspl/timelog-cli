@@ -4,7 +4,7 @@ Guidance for AI coding agents working in this repository.
 
 ## What this is
 
-`tl` is a small command-line time logger written in pure Python (3.8+, standard library only). There is no build step, no linter config and no test suite yet. See [README.md](README.md) for the command list, the design rules (how durations work) and the log file format.
+`tl` is a small command-line time logger written in pure Python (3.8+, standard library only). There is no build step and no linter config. Tests use `unittest` and live in `tests/`; run them from the repo root with `python -m unittest discover -s tests`. They use a temp home dir and a frozen clock, so they never touch the real log. See [README.md](README.md) for the command list, the design rules (how durations work) and the log file format.
 
 ## Running
 

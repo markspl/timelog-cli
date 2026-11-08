@@ -12,7 +12,7 @@ The release notes are written once and used in two places: `CHANGELOG.md` and th
 
 - A release needs a tag, not a branch. Tags are made on `main`.
 - Release branches (`release/0.1`) are only for patching an old version.
-- Keep `main` always working using work branches (`feature/...`, `fix/...`).
+- Keep `main` always working using work branches (`feat/...`, `fix/...`).
 
 ## Version
 

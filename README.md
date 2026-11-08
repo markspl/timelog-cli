@@ -72,6 +72,16 @@ Try it with `tl version`.
 
 > **Windows:** run the steps in Git Bash (it comes with Git for Windows). If `python3` is not found, use `python` or `py` in the alias instead.
 
+## Tests
+
+Run the tests from the repo root (standard library only, no install needed):
+
+```bash
+python -m unittest discover -s tests
+```
+
+They use a temporary home folder, so your real `~/.timelog` is never touched.
+
 ## Design ideas
 
 - A task lasts from its own `add` line to the next `add` or `stop` line.
