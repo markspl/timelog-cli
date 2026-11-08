@@ -11,7 +11,7 @@ Simple time/task logging on the command line. Plain-text log, no dependencies.
 
 ```bash
 tl add [-t|--time <value>] <description>  # start a task now, or at <value> (14:30, 1h5m, 1h, 15m)
-tl note <one-line note>                   # add a note to the current task
+tl note [-t|--time <value>] <note>        # add a note to the current task, now or at <value>
 tl help                                   # overview of all commands
 tl version                                # show the version
 
