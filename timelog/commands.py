@@ -45,6 +45,24 @@ def _parse_time_flag(value: str, now: datetime) -> datetime:
     return now - timedelta(hours=hours, minutes=minutes)
 
 
+def _resolve_time(time_str, prefix: str):
+    """Return the entry time for an optional -t value, or None after printing an error.
+
+    Only the current day can be logged, so a time that lands on another day is rejected."""
+    now = _now()
+    if not time_str:
+        return now
+    try:
+        when = _parse_time_flag(time_str, now=now)
+    except ValueError:
+        print(f"{prefix}: can't parse time flag '{time_str}'. Use HH:MM or e.g. 1h5m, 15m", file=sys.stderr)
+        return None
+    if when.date() != now.date():
+        print(f"{prefix}: '{time_str}' is on a previous day. Only today can be logged", file=sys.stderr)
+        return None
+    return when
+
+
 def add(args: List[str]) -> int:
     """tl add [-t|--time <value>] <description>: start a task.
 
@@ -60,13 +78,9 @@ def add(args: List[str]) -> int:
     if time_str is None and rest is None:
         return 1
 
-    when = _now()
-    if time_str:
-        try:
-            when = _parse_time_flag(time_str, now=when)
-        except ValueError:
-            print(f"tl add: can't parse time flag '{time_str}'. Use HH:MM or e.g. 1h5m, 15m", file=sys.stderr)
-            return 1
+    when = _resolve_time(time_str, "tl add")
+    if when is None:
+        return 1
 
     entry = Entry(time=when, type="add", text=" ".join(rest))
     if not entry.text:
@@ -99,13 +113,9 @@ def note(args: List[str]) -> int:
     if time_str is None and rest is None:
         return 1
 
-    when = _now()
-    if time_str:
-        try:
-            when = _parse_time_flag(time_str, now=when)
-        except ValueError:
-            print(f"tl note: can't parse time flag '{time_str}'. Use HH:MM or e.g. 1h5m, 15m", file=sys.stderr)
-            return 1
+    when = _resolve_time(time_str, "tl note")
+    if when is None:
+        return 1
 
     entry = Entry(time=when, type="note", text=" ".join(rest))
 
