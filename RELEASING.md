@@ -12,7 +12,7 @@ The release notes are written once and used in two places: `CHANGELOG.md` and th
 
 - A release needs a tag, not a branch. Tags are made on `main`.
 - Release branches (`release/0.1`) are only for patching an old version.
-- Keep `main` always working using work branches (`feat/...`, `fix/...`).
+- Keep `main` always working using work branches (`feat/...`, `fix/...`). `main` is protected, so every change, including the release commit (`chore/release-0.2.0`), goes through a pull request.
 
 ## Version
 
@@ -86,17 +86,39 @@ cat CHANGELOG.md >> CHANGELOG.new
 mv CHANGELOG.new CHANGELOG.md
 ```
 
-**5. Commit both files and push:**
+**5. Commit both files on a branch and open a pull request.** `main` is protected: it only accepts changes through a pull request with a passing `test` check.
 
 ```bash
+git switch -c "chore/release-${VERSION#v}"
 git add timelog/__init__.py CHANGELOG.md
 git commit -m "chore: release ${VERSION#v}"
-git push
+git push -u origin HEAD
+gh pr create --base main --title "chore: release ${VERSION#v}" --body "Bump version to ${VERSION#v} and add the $VERSION changelog entry."
 ```
 
-**6. Create the release.** This creates the tag on the release commit you just pushed, and uses the same notes:
+Wait for the checks, then squash-merge. If the merge is blocked, open the PR link and read what is missing:
 
 ```bash
+gh pr checks --watch
+gh pr merge --squash --delete-branch
+```
+
+If you committed on `main` by mistake and the push was rejected, move the commit to a branch and reset `main`:
+
+```bash
+git switch -c "chore/release-${VERSION#v}"
+git branch -f main origin/main
+```
+
+Then continue from `git push -u origin HEAD` above.
+
+**6. Create the release.** First bring the merged commit to local `main` and check the version. The tag is created on the squash commit on `main`, and the release uses the same notes:
+
+```bash
+git switch main
+git pull
+python tl.py version
+git log --oneline -1
 gh release create "$VERSION" --target "$(git rev-parse HEAD)" --title "$VERSION" --notes-file notes.md
 rm notes.md
 ```
@@ -113,6 +135,6 @@ git fetch --tags
 
 - The notes come from commit titles, not pull requests, because GitHub's `--generate-notes` skips commits pushed straight to `main`. Clear titles (`feat:`, `fix:`, `refactor:`) make good notes.
 - Pull requests are squash-merged, with the PR title as the commit title. Each PR then shows as one line in the notes, in the same style as direct commits. With a merge commit, every commit from the branch (including WIP ones) would be listed instead.
-- Step 5 pushes straight to `main`. If `main` is later protected so that changes need a pull request, make the release commit on a branch, squash-merge it, and run step 6 after the merge.
+- `main` is protected, so the release commit goes through a pull request (step 5) and the tag is made after the merge (step 6). The PR title `chore: release X.Y.Z` becomes the commit title on `main`.
 - `gh release create` makes a lightweight tag. That is fine here, since the release page holds the message.
 - Run the steps in one terminal session, since `PREV` and `VERSION` are shell variables.
