@@ -77,6 +77,12 @@ class GetTimeFlagTest(unittest.TestCase):
         with contextlib.redirect_stderr(io.StringIO()):
             self.assertEqual(commands._get_time_flag(["-t"]), (None, None))
 
+    def test_missing_value_uses_prefix(self):
+        err = io.StringIO()
+        with contextlib.redirect_stderr(err):
+            commands._get_time_flag(["-t"], "tl note")
+        self.assertTrue(err.getvalue().startswith("tl note: -t needs a value"))
+
 
 class AddTest(CommandTestCase):
     def test_add_now(self):
@@ -137,12 +143,35 @@ class NoteTest(CommandTestCase):
         self.assertEqual(out, "Note added: PR created (12:00)\n")
         self.assertEqual(self.lines(), ["2026-09-23 12:00\tnote\tPR created"])
 
-    def test_time_flag_rejected(self):
-        for flag in ("-t", "--time"):
-            with self.subTest(flag=flag):
-                code, _, err = self.run_cmd(commands.note, [flag, "09:00", "x"])
+    def test_note_with_clock_time(self):
+        code, out, _ = self.run_cmd(commands.note, ["-t", "09:30", "Decided"])
+        self.assertEqual(code, 0)
+        self.assertEqual(out, "Note added: Decided (09:30)\n")
+        self.assertEqual(self.lines(), ["2026-09-23 09:30\tnote\tDecided"])
+
+    def test_note_with_duration(self):
+        self.run_cmd(commands.note, ["--time", "20m", "Called"])
+        self.assertEqual(self.lines(), ["2026-09-23 11:40\tnote\tCalled"])
+
+    def test_bad_time_flag(self):
+        code, out, err = self.run_cmd(commands.note, ["-t", "nope", "x"])
+        self.assertEqual(code, 1)
+        self.assertEqual(out, "")
+        self.assertIn("tl note: can't parse time flag 'nope'", err)
+        self.assertFalse(self.day_file().exists())
+
+    def test_flag_without_value(self):
+        code, _, err = self.run_cmd(commands.note, ["-t"])
+        self.assertEqual(code, 1)
+        self.assertIn("tl note: -t needs a value", err)
+
+    def test_flag_without_text(self):
+        for args in (["-t", "5m"], ["-t", "5m", "  "]):
+            with self.subTest(args=args):
+                code, out, err = self.run_cmd(commands.note, args)
                 self.assertEqual(code, 1)
-                self.assertIn("not allowed", err)
+                self.assertEqual(out, "")
+                self.assertIn("description is missing", err)
         self.assertFalse(self.day_file().exists())
 
     def test_missing_text(self):

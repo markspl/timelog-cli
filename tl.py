@@ -16,13 +16,13 @@ Usage: tl <command> [text]
 
 Commands:
   add [-t | --time <value>] <description>   start a task now, or at <value>
-  note <text>                               add a note to today's log
+  note [-t | --time <value>] <text>         add a note now, or at <value>
   version                                   show the version
   help                                      show this help
 
 Time values for -t / --time:
   14:30            today at that time
-  1h30m, 1h, 15m   how long ago the task started
+  1h30m, 1h, 15m   how long ago it happened
 """.format(version=__version__)
 
 COMMANDS = {

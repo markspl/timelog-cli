@@ -17,12 +17,12 @@ def _now() -> datetime:
     return datetime.now().replace(second=0, microsecond=0)
 
 
-def _get_time_flag(args):
+def _get_time_flag(args, prefix="tl add"):
     """Return (time_string_or_None, remaining_args), pulling out -t/--time and its value.
     The flag is recognized only as the first argument"""
     if args and args[0] in (TIME_FLAGS):
         if len(args) < 2:
-            print(f"tl add: {args[0]} needs a value, e.g. {args[0]} 14:30", file=sys.stderr)
+            print(f"{prefix}: {args[0]} needs a value, e.g. {args[0]} 14:30", file=sys.stderr)
             return None, None
         return args[1], args[2:]
     return None, args
@@ -56,7 +56,7 @@ def add(args: List[str]) -> int:
         tl add -t 14:30 Meeting
         tl add --time 1h30m Long lunch
     """
-    time_str, rest = _get_time_flag(args)
+    time_str, rest = _get_time_flag(args, "tl add")
     if time_str is None and rest is None:
         return 1
 
@@ -86,16 +86,32 @@ def add(args: List[str]) -> int:
 
 
 def note(args: List[str]) -> int:
-    """tl note <note>: add a note."""
-    if args and args[0] in (TIME_FLAGS):
-        print(render.flag_not_allowed("tl note", args[0]), file=sys.stderr)
+    """tl note [-t|--time <value>] <note>: add a note.
+
+    With the flag, value is either a time (12:00) or how long ago it happened (1h30m).
+
+    Examples:
+        tl note PR created
+        tl note -t 14:30 Decided to postpone
+        tl note --time 20m Called the client
+    """
+    time_str, rest = _get_time_flag(args, "tl note")
+    if time_str is None and rest is None:
         return 1
 
-    entry = Entry(time=_now(), type="note", text=" ".join(args[0:]))
+    when = _now()
+    if time_str:
+        try:
+            when = _parse_time_flag(time_str, now=when)
+        except ValueError:
+            print(f"tl note: can't parse time flag '{time_str}'. Use HH:MM or e.g. 1h5m, 15m", file=sys.stderr)
+            return 1
+
+    entry = Entry(time=when, type="note", text=" ".join(rest))
 
     if not entry.text:
         print(
-            render.missing_argument_error("tl note", "description", "tl note <description>"),
+            render.missing_argument_error("tl note", "description", "tl note [-t <time>] <description>"),
             file=sys.stderr
         )
         return 1
