@@ -12,7 +12,7 @@ from datetime import datetime
 
 
 TIME_FORMAT = "%Y-%m-%d %H:%M"
-TYPES = ("add", "note")  # planned more types later (e.g. list, stop)
+TYPES = ("add", "note", "todo")  # planned more types later (e.g. stop)
 
 
 def clean_text(text: str) -> str:

@@ -17,6 +17,8 @@ Usage: tl <command> [text]
 Commands:
   add [-t | --time <value>] <description>   start a task now, or at <value>
   note [-t | --time <value>] <text>         add a note now, or at <value>
+  todo <text>                               remember something for the next day
+  todos                                     show the previous day's todos
   version                                   show the version
   help                                      show this help
 
@@ -28,6 +30,8 @@ Time values for -t / --time:
 COMMANDS = {
     "add": commands.add,
     "note": commands.note,
+    "todo": commands.todo,
+    "todos": commands.todos,
 }
 
 # Planned commands from README

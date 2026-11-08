@@ -63,6 +63,17 @@ def _resolve_time(time_str, prefix: str):
     return when
 
 
+def _save(entry: Entry) -> None:
+    """Append the entry. If it is the first of the day, print the previous day's todos first."""
+    today = _now().date()
+    first_of_day = not storage.day_exists(today)
+    day, found = storage.previous_todos(today) if first_of_day else (None, [])
+    storage.append_entry(entry)
+    if found:
+        print(render.todo_list(day, found))
+        print()
+
+
 def add(args: List[str]) -> int:
     """tl add [-t|--time <value>] <description>: start a task.
 
@@ -90,7 +101,7 @@ def add(args: List[str]) -> int:
         )
         return 1
 
-    storage.append_entry(entry)
+    _save(entry)
     if time_str:
         print(render.time_added(entry))
     else:
@@ -126,7 +137,48 @@ def note(args: List[str]) -> int:
         )
         return 1
 
-    storage.append_entry(entry)
+    _save(entry)
     print(render.note_added(entry))
+
+    return 0
+
+
+def todo(args: List[str]) -> int:
+    """tl todo <text>: remember something for the next day.
+
+    The next day's first entry shows it, and `tl todos` shows it again.
+
+    Example:
+        tl todo Call the client
+    """
+    if args and args[0] in TIME_FLAGS:
+        print(render.flag_not_allowed("tl todo", args[0]), file=sys.stderr)
+        return 1
+
+    entry = Entry(time=_now(), type="todo", text=" ".join(args))
+    if not entry.text:
+        print(
+            render.missing_argument_error("tl todo", "description", "tl todo <description>"),
+            file=sys.stderr
+        )
+        return 1
+
+    _save(entry)
+    print(render.todo_added(entry))
+
+    return 0
+
+
+def todos(args: List[str]) -> int:
+    """tl todos: show the todos from the previous day."""
+    if args:
+        print("tl todos: takes no arguments. Usage: tl todos", file=sys.stderr)
+        return 1
+
+    day, found = storage.previous_todos(_now().date())
+    if found:
+        print(render.todo_list(day, found))
+    else:
+        print(render.no_todos())
 
     return 0

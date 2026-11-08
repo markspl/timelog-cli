@@ -186,3 +186,88 @@ class NoteTest(CommandTestCase):
         code, _, err = self.run_cmd(commands.note, [])
         self.assertEqual(code, 1)
         self.assertIn("description is missing", err)
+
+
+class TodoTest(CommandTestCase):
+    def test_todo(self):
+        code, out, _ = self.run_cmd(commands.todo, ["Call", "the client"])
+        self.assertEqual(code, 0)
+        self.assertEqual(out, "Todo added: Call the client\n")
+        self.assertEqual(self.lines(), ["2026-09-23 12:00\ttodo\tCall the client"])
+
+    def test_time_flag_is_rejected(self):
+        for flag in ("-t", "--time"):
+            with self.subTest(flag=flag):
+                code, out, err = self.run_cmd(commands.todo, [flag, "5m", "x"])
+                self.assertEqual(code, 1)
+                self.assertEqual(out, "")
+                self.assertIn("not allowed", err)
+        self.assertFalse(self.day_file().exists())
+
+    def test_missing_text(self):
+        code, _, err = self.run_cmd(commands.todo, [])
+        self.assertEqual(code, 1)
+        self.assertIn("description is missing", err)
+        self.assertFalse(self.day_file().exists())
+
+
+class CarryOverTest(CommandTestCase):
+    def write_day(self, day, *lines):
+        path = self.day_file(day)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("".join(line + "\n" for line in lines), encoding="utf-8")
+
+    def test_first_entry_shows_previous_todos(self):
+        self.write_day("2026-09-22", "2026-09-22 17:00\tadd\tWork", "2026-09-22 17:30\ttodo\tCall the client")
+        code, out, _ = self.run_cmd(commands.add, ["Team daily"])
+        self.assertEqual(code, 0)
+        self.assertEqual(
+            out, "Todos from Tue 2026-09-22:\n  - Call the client\n\nStarted: Team daily (12:00)\n"
+        )
+
+    def test_second_entry_does_not_repeat(self):
+        self.write_day("2026-09-22", "2026-09-22 17:30\ttodo\tCall the client")
+        self.run_cmd(commands.add, ["One"])
+        _, out, _ = self.run_cmd(commands.note, ["Two"])
+        self.assertEqual(out, "Note added: Two (12:00)\n")
+
+    def test_note_and_todo_also_trigger(self):
+        self.write_day("2026-09-22", "2026-09-22 17:30\ttodo\tCall the client")
+        _, out, _ = self.run_cmd(commands.note, ["Hi"])
+        self.assertTrue(out.startswith("Todos from Tue 2026-09-22:"))
+
+    def test_gap_day_uses_latest_earlier_file(self):
+        self.write_day("2026-09-18", "2026-09-18 17:30\ttodo\tFriday thing")
+        _, out, _ = self.run_cmd(commands.add, ["x"])
+        self.assertIn("Todos from Fri 2026-09-18:\n  - Friday thing", out)
+
+    def test_only_the_previous_day_is_used(self):
+        self.write_day("2026-09-20", "2026-09-20 17:30\ttodo\tOld")
+        self.write_day("2026-09-22", "2026-09-22 17:30\tadd\tNo todo here")
+        _, out, _ = self.run_cmd(commands.add, ["x"])
+        self.assertEqual(out, "Started: x (12:00)\n")
+
+    def test_no_previous_files(self):
+        _, out, _ = self.run_cmd(commands.add, ["x"])
+        self.assertEqual(out, "Started: x (12:00)\n")
+
+    def test_todos_command(self):
+        self.write_day("2026-09-22", "2026-09-22 17:30\ttodo\tA", "2026-09-22 17:40\ttodo\tB")
+        code, out, _ = self.run_cmd(commands.todos, [])
+        self.assertEqual(code, 0)
+        self.assertEqual(out, "Todos from Tue 2026-09-22:\n  - A\n  - B\n")
+        self.assertFalse(self.day_file().exists())
+
+    def test_todos_command_when_none(self):
+        _, out, _ = self.run_cmd(commands.todos, [])
+        self.assertEqual(out, "No todos from the previous day.\n")
+
+    def test_todos_rejects_arguments(self):
+        code, _, err = self.run_cmd(commands.todos, ["--all"])
+        self.assertEqual(code, 1)
+        self.assertIn("takes no arguments", err)
+
+    def test_bad_lines_are_skipped(self):
+        self.write_day("2026-09-22", "garbage", "2026-09-22 17:30\ttodo\tOK")
+        _, out, _ = self.run_cmd(commands.todos, [])
+        self.assertIn("  - OK", out)

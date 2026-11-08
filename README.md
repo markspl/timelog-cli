@@ -12,6 +12,8 @@ Simple time/task logging on the command line. Plain-text log, no dependencies.
 ```bash
 tl add [-t|--time <value>] <description>  # start a task now, or at <value> (14:30, 1h5m, 1h, 15m)
 tl note [-t|--time <value>] <note>        # add a note to the current task, now or at <value>
+tl todo <text>                            # remember something for the next day
+tl todos                                  # show the previous day's todos
 tl help                                   # overview of all commands
 tl version                                # show the version
 
@@ -87,6 +89,7 @@ They use a temporary home folder, so your real `~/.timelog` is never touched.
 - A task lasts from its own `add` line to the next `add` or `stop` line.
 - `stop` ends the current task. The time after it is not counted, and it has an optional reason, e.g. `tl stop lunch`.
 - `note` adds a line to the current task. It does not end the task and does not change the totals.
+- `todo` is a reminder for the next day. The first entry of a new day (`add`, `note` or `todo`) prints the todos of the most recent earlier day that has a log file, so a weekend does not hide them. Only that one day is looked at, and todos have no done status yet.
 - Each day has its own file, and a new day starts with nothing running.
 - Totals group by exact task name.
 - Entries are sorted by time before durations are calculated. A task added later with `-t` lands in the right place, even though the file is append-only.
@@ -95,7 +98,7 @@ They use a temporary home folder, so your real `~/.timelog` is never touched.
 
 Data lives in one plain-text file per day: `~/.timelog/<yyyy-mm-dd>.tsv`
 
-One line per entry, with three tab-separated fields: date and time, type (`add`, `note` or `stop`), and text. The text of a `stop` is optional.
+One line per entry, with three tab-separated fields: date and time, type (`add`, `note`, `todo` or `stop`), and text. The text of a `stop` is optional.
 
 ```text
 2026-09-23 08:30	add	Ticket-67: Investigate
